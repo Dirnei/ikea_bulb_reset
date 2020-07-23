@@ -1,27 +1,13 @@
-#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
-
-const char* mqttTopic          = "sonoff/s20/relay";
-const char* mqttResetModeTopic = "sonoff/s20/mode/reset";
-
-IPAddress broker(192,168,0,251);                     // Address of the MQTT broker
-
-#define CLIENT_ID "client-000000"                    // Client ID to send to the broker
-
-/* WiFi Settings */
-const char* ssid     = "YOUR_WLAN_SSID";
-const char* password = "YOUR_WLAN_PASSWORD";
-
-#define USE_MQTT_AUTH
-#define MQTT_USER "MQTT_USER"
-#define MQTT_PASSWORD "MQTT_PASSWORD"
+#include "config.h"
 
 #define RELAY 12
 #define GREEN_LED 13
 #define BUTTON 0
 
+#ifdef USE_MQTT
 WiFiClient wificlient;
 PubSubClient client(wificlient);
+#endif
 
 int _lastPress = millis();
 
@@ -30,6 +16,11 @@ int _resetMode = 0;
 int _durationBetween = 10000;
 int _isLocked = 0;
 int _lockedUntil = 0;
+
+int _lockDuration = 20000;
+int _cycles = 6;
+int _delayOn = 500;
+int _delayOff = 500;
 
 void setup()
 {
@@ -41,7 +32,7 @@ void setup()
   Serial.begin(115200);
   
   digitalWrite(GREEN_LED, HIGH); // Turn the LED off by making the voltage HIGH
-
+#ifdef USE_MQTT
   WiFi.mode(WIFI_STA);
   
   Serial.print("Connecting to: ");
@@ -53,6 +44,7 @@ void setup()
   /* Prepare MQTT client */
   client.setServer(broker, 1883);
   client.setCallback(mqttMessage);
+#endif
 }
 
 void buttonPressed()
@@ -91,9 +83,10 @@ void setResetMode(int state)
   _resetMode = state;
   digitalWrite(GREEN_LED, !state);
 
-  if(state == 1)
+  if(state == 1 && _relayState  == 0)
   {
-    setRelay(1, 1);
+    setRelay(1, 0);
+    delay(2000);
   }
 }
 
@@ -112,18 +105,27 @@ void setRelay(int state, int publish)
     return;
   }
 
+  publishState();
+}
+
+void publishState()
+{
+#ifdef USE_MQTT
   char mqttPubTopic[128];
   sprintf(mqttPubTopic, "%s%s", mqttTopic, "/state");
-  if(state == 1)
+  if(_isLocked==1)
   {
-    Serial.println("ON");
-    client.publish(mqttPubTopic, "ON");
+    client.publish(mqttPubTopic, "{\"state\": \"LOCKED\"}");
+  }
+  else if(_relayState == 1)
+  {
+    client.publish(mqttPubTopic, "{\"state\": \"ON\"}");
   }
   else
   { 
-    Serial.println("OFF");
-    client.publish(mqttPubTopic, "OFF");
+    client.publish(mqttPubTopic, "{\"state\": \"OFF\"}");
   }
+#endif
 }
 
 void loop()
@@ -131,15 +133,17 @@ void loop()
   if(_resetMode == 1 && _isLocked == 0)
   {
     performReset();
-    lockRelayFor(20000);
+    lockRelayFor(_lockDuration);
   }
 
   if(_isLocked && _lockedUntil < millis())
   {
     _isLocked = 0;
+
+    publishState();
     setResetMode(0);
   }
-  
+#ifdef USE_MQTT
   if (WiFi.status() != WL_CONNECTED)
   {
     reconnectWifi();
@@ -152,17 +156,18 @@ void loop()
   {
     client.loop();
   }
+#endif
 }
 
 void performReset()
 {
   Serial.println("Perform reset...");
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < _cycles; i++)
   {
     setRelay(0, 0);
-    delay(500);
+    delay(_delayOff);
     setRelay(1, 0);
-    delay(500);
+    delay(_delayOn);
   }
 
   Serial.println("Reset done");
@@ -172,8 +177,10 @@ void lockRelayFor(int duration)
 {
   _isLocked = 1;
   _lockedUntil = millis() + duration;
+  publishState();
 }
 
+#ifdef USE_MQTT
 void reconnectWifi()
 {
   int counter = 0;
@@ -223,6 +230,7 @@ void reconnectMQTT()
       Serial.println("connected to MQTT broker");
       client.subscribe(mqttTopic);
       client.subscribe(mqttResetModeTopic);
+      publishState();
     } 
     else 
     {
@@ -236,28 +244,41 @@ void reconnectMQTT()
 
 void mqttMessage(char* topic, byte* payload, unsigned int length) 
 {
+  StaticJsonDocument<200> doc;
+  DeserializationError error = deserializeJson(doc, payload);
+
   if (!strcmp(topic, mqttTopic)) 
   {
-    setRelayViaMqtt(payload, length);
-  }
-  else
-  {
-    setResetMode(1);
-  }
-}
+    // Test if parsing succeeds.
+    if (error) 
+    {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+      return;
+    }
 
-int setRelayViaMqtt(byte* payload, unsigned int length)
-{
-    if (!strncasecmp_P((char *)payload, "OFF", length)) 
+    const char* state = doc["state"];    
+    if (strncmp(state, "OFF", 3)==0) 
     {
       setRelay(0, 1);
     }
-    else if (!strncasecmp_P((char *)payload, "ON", length)) 
+    else if (strncmp(state, "ON", 2)==0) 
     {
       setRelay(1, 1);
     }
-    else if (!strncasecmp_P((char *)payload, "TOGGLE", length))
+    else if (strncmp(state, "TOGGLE", 6)==0)
     {
       setRelay(!_relayState, 1);
     }
+  }
+  else
+  {
+    _lockDuration = doc["lockDuration"];
+    _cycles = doc["cycles"];
+    _delayOn = doc["delayOn"];
+    _delayOff = doc["delayOff"];
+
+    setResetMode(1);
+  }
 }
+#endif
