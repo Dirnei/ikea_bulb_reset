@@ -273,12 +273,23 @@ void mqttMessage(char* topic, byte* payload, unsigned int length)
   }
   else
   {
-    _lockDuration = doc["lockDuration"];
-    _cycles = doc["cycles"];
-    _delayOn = doc["delayOn"];
-    _delayOff = doc["delayOff"];
+    _lockDuration = useDefaultIfEmpty(doc["lockDuration"], 20000);
+    _cycles = useDefaultIfEmpty(doc["cycles"], 6);
+    _delayOn = useDefaultIfEmpty(doc["delayOn"], 500);
+    _delayOff = useDefaultIfEmpty(doc["delayOff"], 500);
 
     setResetMode(1);
   }
 }
+
+int useDefaultIfEmpty(int value, int defaultValue)
+{
+  if(value <= 0)
+  {
+    return defaultValue;
+  }
+
+  return value;
+}
+
 #endif
