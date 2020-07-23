@@ -49,6 +49,8 @@ To run the reset procedure for the Ikea Tradfri Bulb you have to publish to __mq
 }
 ```
 
+You don't have to set all properties. All properties that are not set will be set to the default value described below. That means, if you are happy with the default values, you can also send a empty payload.
+
 #### lockDuration
 
 Time in milliseconds for how long the relay state is locked for changes after the reset procedure finished. Default: __20000__
@@ -59,11 +61,11 @@ The amount of ON OFF cycles that will be performed during the reset procedure. D
 
 #### delayOn
 
-Time in milliseconds for the delay after the relay is turned *ON* in the reset procedure
+Time in milliseconds for the delay after the relay is turned *ON* in the reset procedure. Default: __500__
 
 #### delayOff
 
-Time in milliseconds for the delay after the relay is turned *OFF* in the reset procedure
+Time in milliseconds for the delay after the relay is turned *OFF* in the reset procedure. Default: __500__
 
 ### MQTT Feedback
 
