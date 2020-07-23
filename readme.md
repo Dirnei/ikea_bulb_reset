@@ -1,6 +1,8 @@
-# Sonoff Ikea Bulb Resetter
+# Sonoff Ikea TRÅDFRI reset
 
-This is a small firmware used to flash on a Sonoff S20. It is used to reset the ikea bulb to pairing mode. I need to reset about 20 bulb and to do this manually sucks.
+Reset a Ikea Tradfri bulb can be quite frustrating. To solve this issue, i wrote this firmware for the Sonoff S20 i had lying around. It should also work for other sonoffs but i don't tested it. Please let me know if you tried it on a other device, so i can mention it here.
+
+I wrote it first without any networking features, to quickly prototype the reset procedure. After that i added MQTT support, because thats how i use the sonoff devices. Usually with TASMOTA, but the current implementation is all i use from it anyway.
 
 ## Usage
 
@@ -70,4 +72,4 @@ Time in milliseconds for the delay after the relay is turned *OFF* in the reset 
 ### MQTT Feedback
 
 When the relay toggles you will get a status message to your __mqttTopic__ with the prefix __/status__.
-During the reset procedure you will not get any status updates, only when it finishes you will get a message with status __LOCKED__ and when the lock is removed you will be notified again with the current relay state. 
+During the reset procedure you will not get any status updates, only when it finishes you will get a message with status __LOCKED__ and when the lock is removed you will be notified again with the current relay state.
