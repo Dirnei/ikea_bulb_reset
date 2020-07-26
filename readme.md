@@ -4,9 +4,23 @@ Resetting an Ikea Trådfri bulb can be quite frustrating. To solve this issue, I
 
 I wrote it first without any networking features to quickly prototype the reset procedure. After that, I added MQTT support, because that's how I communicate with the sonoff devices. Usually with TASMOTA, but the current implementation is all I use from it anyway.
 
-## Usage
+## Flashing
 
-Clone this repo and flash it to your S20 with your favourite programmer. E.g. I use VS-Code with the Arduino extension.
+Clone this repo and flash it to your S20 with your favourite programmer. E.g. I use VS Code with the Arduino extension.
+If you also use the same as i do, it is allready configured for you. If not use the following settings:
+
+```
+    CpuFrequency    =   80
+    FlashFreq       =   40
+    FlashMode       =   dout
+    UploadSpeed     =   115200
+    FlashSize       =   512K64
+    ResetMethod     =   ck
+    Debug           =   Disabled
+    DebugLevel      =   None____
+```
+
+## Usage without MQTT
 
 Plug it into your wall outlet, long-press the button on the front, and it will start the reset procedure.
 
@@ -59,7 +73,7 @@ Time in milliseconds for how long the relay state is locked for changes after th
 
 #### cycles
 
-The number of ON-OFF cycles that will be performed during the reset procedure. Default: __6__ (for Ikea Tradfri)
+The number of ON-OFF cycles that will be performed during the reset procedure. Default: __6__
 
 #### delayOn
 
