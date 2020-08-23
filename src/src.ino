@@ -47,7 +47,7 @@ void setup()
 #endif
 }
 
-void buttonPressed()
+ICACHE_RAM_ATTR void buttonPressed()
 {
   int input = digitalRead(0);
 
