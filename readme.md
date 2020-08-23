@@ -90,5 +90,7 @@ During the reset procedure, you will not get any status updates. Only when it fi
 
 ## Tested devices
 
+The following devices where successfully tested:
+
 - Sonoff S20
 - Sonoff S26
