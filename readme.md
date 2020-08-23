@@ -85,5 +85,5 @@ Time in milliseconds for the delay after the relay is turned *OFF* in the reset 
 
 ### MQTT Feedback
 
-When the relay toggles you will get a status message to your __mqttTopic__ with the prefix __/status__.
+When the relay toggles you will get a status message to your __mqttTopic__ with the suffix __/status__.
 During the reset procedure, you will not get any status updates. Only when it finishes, you will get a message with status __LOCKED__. When the lock is removed, you will be notified again with the current relay state.
