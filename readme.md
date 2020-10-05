@@ -1,12 +1,12 @@
 # Sonoff Ikea TRÅDFRI reset
 
-Resetting an Ikea Trådfri bulb can be quite frustrating. To solve this issue, I wrote this firmware for the Sonoff S20 I had lying around. It should also work for other sonoffs, but I have not tested that. Please let me know if you tried it on another device so that I can mention it here.
+Resetting an Ikea Trådfri bulb can be quite frustrating. To solve this issue, I wrote this firmware for the Sonoff S20 / S26 I had lying around. It should also work for other sonoffs, but I have not tested that. Please let me know if you tried it on another device so that I can mention it here.
 
 I wrote it first without any networking features to quickly prototype the reset procedure. After that, I added MQTT support, because that's how I communicate with the sonoff devices. Usually with TASMOTA, but the current implementation is all I use from it anyway.
 
 ## Flashing
 
-Clone this repo and flash it to your S20 with your favourite programmer. E.g. I use VS Code with the Arduino extension.
+Clone this repo and flash it to your S20 / S26 with your favourite programmer. E.g. I use VS Code with the Arduino extension.
 If you also use the same as i do, it is allready configured for you. If not use the following settings:
 
 ```
@@ -85,5 +85,12 @@ Time in milliseconds for the delay after the relay is turned *OFF* in the reset 
 
 ### MQTT Feedback
 
-When the relay toggles you will get a status message to your __mqttTopic__ with the prefix __/status__.
+When the relay toggles you will get a status message to your __mqttTopic__ with the suffix __/status__.
 During the reset procedure, you will not get any status updates. Only when it finishes, you will get a message with status __LOCKED__. When the lock is removed, you will be notified again with the current relay state.
+
+## Tested devices
+
+The following devices where successfully tested:
+
+- Sonoff S20
+- Sonoff S26

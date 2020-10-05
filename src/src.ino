@@ -47,7 +47,7 @@ void setup()
 #endif
 }
 
-void buttonPressed()
+ICACHE_RAM_ATTR void buttonPressed()
 {
   int input = digitalRead(0);
 
@@ -224,7 +224,7 @@ void reconnectMQTT()
 #ifdef USE_MQTT_AUTH
     if (client.connect(CLIENT_ID, MQTT_USER, MQTT_PASSWORD))
 #else
-    if(cleint.connect(CLIENT_ID))
+    if(client.connect(CLIENT_ID))
 #endif
     {
       Serial.println("connected to MQTT broker");
