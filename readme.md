@@ -67,6 +67,10 @@ To run the reset procedure for the Ikea Tradfri Bulb you have to publish to __mq
 
 You don't have to set all properties. All properties that are not set will be set to the default value described below. That means, if you are happy with the default values, you can also send an empty payload.
 
+#### Working payload examples:
+
+Have a look at the [wiki](https://github.com/Dirnei/ikea_bulb_reset/wiki/Known-Reset-Configurations) for working payloads. If you tried it with bulbs of other vendors please let me know so i can add it to the list. 
+
 #### lockDuration
 
 Time in milliseconds for how long the relay state is locked for changes after the reset procedure finished. Default: __20000__
